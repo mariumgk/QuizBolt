@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --navbar-height: 3.5rem;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-background text-foreground antialiased;
+}
+
+#__next {
+  height: 100%;
+}
+
+.app-shell {
+  @apply min-h-screen bg-background text-foreground flex;
+}
+
+.app-main {
+  @apply flex-1 flex flex-col;
+}
