@@ -60,6 +60,8 @@ export default function FlashcardStudyPage() {
     if (!set) return;
 
     const card = set.cards[currentIndex];
+    if (!card.id) return; // Add null check for card ID
+
     const newLevel = known
       ? Math.min(5, card.masteryLevel + 1)
       : Math.max(0, card.masteryLevel - 1);
