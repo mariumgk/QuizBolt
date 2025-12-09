@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, DragEvent } from "react";
+import { useState, DragEvent, ChangeEvent, useRef } from "react";
 import { UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Props {
   onMockUpload: (fileName: string) => void;
+  onFileSelected?: (file: File) => void;
 }
 
-export function FileDropzone({ onMockUpload }: Props) {
+export function FileDropzone({ onMockUpload, onFileSelected }: Props) {
   const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -17,6 +19,19 @@ export function FileDropzone({ onMockUpload }: Props) {
     const file = e.dataTransfer.files?.[0];
     if (file) {
       onMockUpload(file.name);
+      if (onFileSelected) {
+        onFileSelected(file);
+      }
+    }
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onMockUpload(file.name);
+      if (onFileSelected) {
+        onFileSelected(file);
+      }
     }
   };
 
@@ -32,12 +47,24 @@ export function FileDropzone({ onMockUpload }: Props) {
     >
       <UploadCloud className="h-8 w-8 text-primary" />
       <p className="text-sm font-medium">
-        Drag & drop PDFs, images, or documents here
+        Drag & drop documents here
       </p>
       <p className="text-xs text-muted-foreground">
-        Mock upload only – files stay in your browser.
+        
       </p>
-      <Button size="sm" className="mt-2" type="button">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="application/pdf"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <Button
+        size="sm"
+        className="mt-2"
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+      >
         Browse files
       </Button>
     </div>

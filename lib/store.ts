@@ -21,11 +21,7 @@ interface QuizBoltState {
 }
 
 export const useQuizBoltStore = create<QuizBoltState>((set) => ({
-  profile: {
-    id: "demo-user",
-    name: "Demo Student",
-    email: "demo@quizbolt.ai",
-  },
+  profile: null,
   theme: "system",
   notificationsEnabled: true,
   isAuthenticated: false,

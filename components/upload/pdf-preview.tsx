@@ -19,8 +19,7 @@ export function PdfPreview({ sourceLabel }: Props) {
         {sourceLabel}
       </p>
       <p>
-        This is a placeholder preview. In a real app, we would render the first
-        pages of the uploaded PDF or extracted content.
+        Render the first pages of the uploaded PDF or extracted content.
       </p>
     </div>
   );

@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useQuizBoltStore } from "@/lib/store";
+import { loginAction } from "./actions";
 
 type FormValues = {
   email: string;
@@ -15,8 +14,8 @@ type FormValues = {
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
-  const { login } = useQuizBoltStore();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
   const {
     register,
     handleSubmit,
@@ -24,8 +23,13 @@ export default function LoginPage() {
   } = useForm<FormValues>();
 
   const onSubmit = (values: FormValues) => {
-    login({ id: "user-1", name: values.email.split("@")[0], email: values.email });
-    router.push("/dashboard");
+    setServerError(null);
+    startTransition(async () => {
+      const result = await loginAction(values);
+      if (result && !result.success) {
+        setServerError(result.error ?? "Login failed. Please try again.");
+      }
+    });
   };
 
   return (
@@ -63,9 +67,12 @@ export default function LoginPage() {
               <p className="text-xs text-destructive">{errors.password.message}</p>
             )}
           </div>
-          <Button className="w-full" disabled={isSubmitting}>
+          <Button className="w-full" disabled={isSubmitting || isPending}>
             Log in
           </Button>
+          {serverError && (
+            <p className="text-xs text-destructive text-center">{serverError}</p>
+          )}
         </form>
         <p className="mt-4 text-xs text-muted-foreground">
           Don&apos;t have an account?{" "}

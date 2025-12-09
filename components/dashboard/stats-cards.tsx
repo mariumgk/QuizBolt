@@ -1,27 +1,49 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import { mockGetAnalytics } from "@/lib/mock-api/analytics";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { getStudyMetrics, type StudyMetrics } from "@/app/actions/analytics";
 
 export function StatsCards() {
-  const { data, isLoading } = useQuery({
-    queryKey: ["analytics-summary"],
-    queryFn: mockGetAnalytics,
-  });
+  const [metrics, setMetrics] = useState<StudyMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const summary = data?.summary;
-
-  const skeleton = (
-    <div className="h-6 w-16 animate-pulse rounded bg-muted" />
-  );
+  useEffect(() => {
+    async function loadMetrics() {
+      try {
+        const data = await getStudyMetrics();
+        setMetrics(data);
+      } catch (error) {
+        console.error("Failed to load metrics:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadMetrics();
+  }, []);
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
-      <StatCard label="Total quizzes" value={summary?.totalQuizzes} loading={isLoading} />
-      <StatCard label="Flashcards" value={summary?.totalFlashcards} loading={isLoading} />
-      <StatCard label="Avg. score" value={summary?.averageScore + "%"} loading={isLoading} />
-      <StatCard label="Study streak" value={summary?.studyStreakDays + " days"} loading={isLoading} />
+      <StatCard
+        label="Documents"
+        value={metrics?.totalDocuments ?? 0}
+        loading={isLoading}
+      />
+      <StatCard
+        label="Quizzes"
+        value={metrics?.totalQuizzes ?? 0}
+        loading={isLoading}
+      />
+      <StatCard
+        label="Flashcard Sets"
+        value={metrics?.totalFlashcards ?? 0}
+        loading={isLoading}
+      />
+      <StatCard
+        label="Avg. Score"
+        value={`${metrics?.averageQuizScore ?? 0}%`}
+        loading={isLoading}
+      />
     </div>
   );
 }
@@ -42,7 +64,7 @@ function StatCard({
       </span>
       <span className={cn("text-xl font-semibold", loading && "text-muted-foreground")}
       >
-        {loading ? "…" : value}
+        {loading ? "..." : value}
       </span>
     </div>
   );

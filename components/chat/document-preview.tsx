@@ -14,8 +14,7 @@ export function DocumentPreview({ title }: Props) {
         <>
           <p className="mb-1 truncate text-foreground">{title}</p>
           <p>
-            This is a mock preview of the selected document. Connect your real
-            storage later to show actual pages or extracted text.
+            chating with this document
           </p>
         </>
       ) : (

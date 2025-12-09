@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useQuizBoltStore } from "@/lib/store";
+import { createClientSupabaseClient } from "@/lib/supabase/client";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
@@ -21,6 +22,14 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, logout } = useQuizBoltStore();
+  const supabase = createClientSupabaseClient();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    logout();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <header className="h-14 border-b bg-background/80 backdrop-blur flex items-center px-4 justify-between">
@@ -63,10 +72,7 @@ export function Navbar() {
               size="sm"
               variant="ghost"
               type="button"
-              onClick={() => {
-                logout();
-                router.push("/login");
-              }}
+              onClick={handleLogout}
             >
               Logout
             </Button>

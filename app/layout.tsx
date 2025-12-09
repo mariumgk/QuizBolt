@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body>
         <AppProviders>
-          <AppShell>{children}</AppShell>
+          {children}
         </AppProviders>
       </body>
     </html>
