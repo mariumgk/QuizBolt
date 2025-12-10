@@ -133,7 +133,11 @@ export default function NoteDetailPage() {
                             <Button variant="outline" onClick={() => setIsEditing(true)}>
                                 Edit
                             </Button>
-                            <Button variant="destructive" onClick={handleDelete}>
+                            <Button
+                                variant="outline"
+                                onClick={handleDelete}
+                                className="border-red-500 text-red-500 hover:bg-red-50"
+                            >
                                 Delete
                             </Button>
                         </>
