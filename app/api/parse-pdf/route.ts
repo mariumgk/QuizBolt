@@ -24,8 +24,9 @@ export async function POST(request: NextRequest) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Dynamically import pdf-parse to avoid any SSR issues
-        const pdfParse = (await import("pdf-parse")).default;
+        // Use require for pdf-parse (CommonJS module) for compatibility
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const pdfParse = require("pdf-parse");
 
         // Parse the PDF
         const data = await pdfParse(buffer);
