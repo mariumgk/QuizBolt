@@ -33,7 +33,7 @@ const features = [
     {
         icon: Download,
         title: "Export & Share",
-        description: "Export your notes and quizzes to take them anywhere (Coming Soon).",
+        description: "Export your notes and quizzes to take them anywhere.",
     },
 ];
 

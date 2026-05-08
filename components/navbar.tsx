@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useQuizBoltStore } from "@/lib/store";
 import { createClientSupabaseClient } from "@/lib/supabase/client";
+import { Logo } from "@/components/logo";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard" },
@@ -34,13 +34,7 @@ export function Navbar() {
   return (
     <header className="h-14 border-b bg-background/80 backdrop-blur flex items-center px-4 justify-between">
       <div className="flex items-center gap-2">
-        <Image
-          src="/quizbolt-logo.png"
-          alt="QuizBolt logo"
-          width={24}
-          height={24}
-          className="rounded"
-        />
+        <Logo className="w-6 h-6 text-blue-600" />
         <span className="font-semibold">QuizBolt</span>
       </div>
       <nav className="hidden md:flex items-center gap-1 text-sm">
