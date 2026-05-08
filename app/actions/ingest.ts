@@ -83,25 +83,69 @@ export async function ingestDocument(params: {
   let rawText = "";
 
   if (sourceType === "upload") {
-    const { data, error } = await supabase.functions.invoke("extract-text", {
-      body: { path: storagePath },
-    });
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from("documents")
+      .download(storagePath!);
 
-    if (error) {
-      throw new Error("extract-text Edge Function call failed");
+    if (downloadError || !fileData) {
+      throw new Error("Failed to download file from storage for extraction");
     }
 
-    rawText = (data as { rawText?: string }).rawText ?? "";
+    try {
+      const arrayBuffer = await fileData.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      const pdfParseLib = await import("pdf-parse");
+      const pdfParse = (pdfParseLib.default || pdfParseLib) as any;
+      const parsedPdf = await pdfParse(buffer);
+      rawText = parsedPdf.text ?? "";
+    } catch (err) {
+      console.error("PDF parse error:", err);
+      throw new Error("extract-text internal parsing failed");
+    }
   } else if (sourceType === "url") {
-    const { data, error } = await supabase.functions.invoke("fetch-url", {
-      body: { url },
-    });
+    try {
+      const response = await fetch(url!, {
+        headers: {
+          "User-Agent": "QuizBolt/1.0 (Educational Content Fetcher)",
+        },
+        signal: AbortSignal.timeout(30000),
+      });
 
-    if (error) {
-      throw new Error("fetch-url Edge Function call failed");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+      }
+
+      let html = await response.text();
+
+      // Extract clean text from HTML
+      html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+      html = html.replace(/<!--[\s\S]*?-->/g, '');
+      html = html.replace(/<[^>]+>/g, ' ');
+
+      html = html
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&apos;/g, "'");
+
+      html = html
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\t/g, ' ')
+        .replace(/ +/g, ' ')
+        .replace(/\n\n+/g, '\n\n')
+        .trim();
+
+      const lines = html.split('\n').filter(line => line.trim().length > 0);
+      rawText = lines.join('\n');
+    } catch (err) {
+      console.error("fetch-url error:", err);
+      throw new Error("fetch-url network or parsing failed");
     }
-
-    rawText = (data as { rawText?: string }).rawText ?? "";
   } else if (sourceType === "text") {
     rawText = text ?? "";
   }
